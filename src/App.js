@@ -18,6 +18,6 @@ export default function App() {
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/stats" element={<Stats />} />
       </Routes>
-    </BrowserRouter>
+    </BrowserRouter> 
   );
 }
