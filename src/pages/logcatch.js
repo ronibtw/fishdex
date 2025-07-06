@@ -16,37 +16,40 @@ export default function LogCatch() {
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setUploading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setUploading(true);
 
-    try {
-      let photoURL = "";
+  try {
+    let photoURL = "";
 
-      // If user selected a file, upload it
-      if (imageFile) {
-        const imageRef = ref(storage, `catches/${auth.currentUser.uid}/${uuidv4()}`);
-        await uploadBytes(imageRef, imageFile);
-        photoURL = await getDownloadURL(imageRef);
-      }
-
-      // Save catch info to Firestore
-      await addDoc(collection(db, "catches"), {
-        ...form,
-        photo: photoURL,
-        uid: auth.currentUser.uid,
-        created: Timestamp.now()
-      });
-
-      alert("🎣 Catch logged!");
-      setForm({ species: "", weight: "", length: "", type: "fresh" });
-      setImageFile(null);
-    } catch (err) {
-      alert("Error logging catch: " + err.message);
+    if (imageFile) {
+      const imageRef = ref(storage, `catches/${auth.currentUser.uid}/${uuidv4()}`);
+      console.log("Uploading image...");
+      const snapshot = await uploadBytes(imageRef, imageFile);
+      console.log("Upload complete");
+      photoURL = await getDownloadURL(snapshot.ref);
+      console.log("Image URL:", photoURL);
     }
 
-    setUploading(false);
-  };
+    await addDoc(collection(db, "catches"), {
+      ...form,
+      photo: photoURL,
+      uid: auth.currentUser.uid,
+      created: Timestamp.now()
+    });
+
+    alert("🎣 Catch logged!");
+    setForm({ species: "", weight: "", length: "", type: "fresh" });
+    setImageFile(null);
+  } catch (err) {
+    console.error("Upload error:", err);
+    alert("❌ Failed to upload image or save catch.");
+  }
+
+  setUploading(false);
+};
+
 
   return (
     <div className="pb-20 p-4">
